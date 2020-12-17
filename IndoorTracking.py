@@ -44,7 +44,10 @@ def calculateAverage(average,averageCount,currentCount):
     if averageCount < 0:
         average = currentCount
     else:
-        average = (average * averageCount + currentCount) / (averageCount + 1)
+        weight = 1
+        if(currentCount > average):
+            weight = 0.3
+        average = (average * weight * averageCount + currentCount) / (averageCount* weight + 1)
 
     return average
 
