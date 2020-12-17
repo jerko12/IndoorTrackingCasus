@@ -8,6 +8,9 @@ cap = cv2.VideoCapture("walking.avi")
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
+global averageCount
+global average
+
 def GetContours():
     ret, frame1 = cap.read()
     ret, frame2 = cap.read()
@@ -25,7 +28,7 @@ def GetContours():
 def detector(image):
     #image = imutils.resize(image, width=min(400, image.shape[1]))
     clone = image.copy()
-    rects, weights = hog.detectMultiScale(image, winStride=(4, 4), padding=(8, 8), scale=0.55)
+    rects, weights = hog.detectMultiScale(image, winStride=(1, 1), padding=(8, 8), scale=0.25)
     #setRectangles(image, rects)
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
     result = non_max_suppression(rects, probs=None, overlapThresh=1)
@@ -37,8 +40,19 @@ def setRectangles(image, rects, weights):
         cv2.rectangle(image, (xA, yA), (xB, yB), (0, (50 * weights[index][0]) + 100, 200 / weights[index][0]), 1)
         index += 1
 
+def calculateAverage(average,averageCount,currentCount):
+    if averageCount < 0:
+        average = currentCount
+    else:
+        average = (average * averageCount + currentCount) / (averageCount + 1)
+
+    return average
+
 ret, frame1 = cap.read()
 ret, frame2 = cap.read()
+
+average = 0
+averageCount = 0
 while cap.isOpened():
 
     #frame1 = imutils.resize(frame1, width=min(800, frame1.shape[1]))
@@ -54,7 +68,11 @@ while cap.isOpened():
 
     #cv2.drawContours(frame1,contours, -1, (0,255,0), 2)
 
-    print (result1 , weights)
+    #print (result1 , weights)
+    average = calculateAverage(average, averageCount ,result1)
+    averageCount += 1
+    print(result1,average,averageCount)
+
     setRectangles(frame1,result,weights)
     
     
