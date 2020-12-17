@@ -3,7 +3,7 @@ import imutils
 from imutils.object_detection import non_max_suppression
 import numpy as np
 
-cap = cv2.VideoCapture("LondonWalk_Trim.mp4")
+cap = cv2.VideoCapture("walking.avi")
 
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
@@ -25,20 +25,24 @@ def GetContours():
 def detector(image):
     #image = imutils.resize(image, width=min(400, image.shape[1]))
     clone = image.copy()
-    rects, weights = hog.detectMultiScale(image, winStride=(4, 4), padding=(8, 8), scale=1.05)
-    for (x, y, w, h) in rects:
-       cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    rects, weights = hog.detectMultiScale(image, winStride=(4, 4), padding=(8, 8), scale=0.55)
+    #setRectangles(image, rects)
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-    result = non_max_suppression(rects, probs=None, overlapThresh=0.9)
-    return result
+    result = non_max_suppression(rects, probs=None, overlapThresh=1)
+    return result,weights
 
+def setRectangles(image, rects, weights):
+    index = 0
+    for (xA, yA, xB, yB) in result:
+        cv2.rectangle(image, (xA, yA), (xB, yB), (0, (50 * weights[index][0]) + 100, 200 / weights[index][0]), 1)
+        index += 1
 
 ret, frame1 = cap.read()
 ret, frame2 = cap.read()
 while cap.isOpened():
 
-
-    result = detector(frame1.copy())
+    #frame1 = imutils.resize(frame1, width=min(800, frame1.shape[1]))
+    result,weights = detector(frame1.copy())
     result1 = len(result)
     
     #diff = cv2.absdiff(frame1,frame2)
@@ -50,12 +54,12 @@ while cap.isOpened():
 
     #cv2.drawContours(frame1,contours, -1, (0,255,0), 2)
 
-    print (result1)
-    for (xA, yA, xB, yB) in result:
-        cv2.rectangle(frame1, (xA, yA), (xB, yB), (0, 255, 0), 2)
+    print (result1 , weights)
+    setRectangles(frame1,result,weights)
+    
     
 
-
+    #frame1 = imutils.resize(frame1, width=max(600, frame1.shape[1]))
     cv2.imshow("feed", frame1)
     frame1 = frame2
     ret, frame2 = cap.read()
