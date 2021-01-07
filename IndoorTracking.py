@@ -2,7 +2,41 @@ import cv2
 import imutils
 from imutils.object_detection import non_max_suppression
 import numpy as np
+import pyrebase
 
+#Firebase
+firebaseConfig={
+    'apiKey': "AIzaSyCr2H0WACeTfZWxPSqE-h3UORXcR439Mts",
+    'authDomain': "indoor-tracking-89bd9.firebaseapp.com",
+    'databaseURL': "https://indoor-tracking-89bd9-default-rtdb.europe-west1.firebasedatabase.app",
+    'projectId': "indoor-tracking-89bd9",
+    'storageBucket': "indoor-tracking-89bd9.appspot.com",
+    'messagingSenderId': "900801920066",
+    'appId': "1:900801920066':web:d8e25b256dc3739a5581db",
+    'measurementId': "G-52TF0D1RCD"
+}
+
+firebase = pyrebase.initialize_app(firebaseConfig)
+
+db = firebase.database()
+#auth = firebase.auth()
+#storage=firebase.storage()
+
+
+
+def getData():
+    return {
+        'PeopleCounts': {'12:00': 4,'12:01':3}
+    }
+
+data = getData()
+
+db.child("Rooms").child("Room1").set(data)
+
+def databaseCreate():
+    print("createNewData")
+
+#Open CV
 cap = cv2.VideoCapture("walking.avi")
 
 hog = cv2.HOGDescriptor()
@@ -27,8 +61,9 @@ def GetContours():
 
 def detector(image):
     #image = imutils.resize(image, width=min(400, image.shape[1]))
+    
     clone = image.copy()
-    rects, weights = hog.detectMultiScale(image, winStride=(1, 1), padding=(8, 8), scale=0.25)
+    rects, weights = hog.detectMultiScale(image, winStride=(3, 3), padding=(16, 16), scale=0.25)
     #setRectangles(image, rects)
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
     result = non_max_suppression(rects, probs=None, overlapThresh=1)
@@ -46,7 +81,7 @@ def calculateAverage(average,averageCount,currentCount):
     else:
         weight = 1
         if(currentCount > average):
-            weight = 0.3
+            weight = 0.01
         average = (average * weight * averageCount + currentCount) / (averageCount* weight + 1)
 
     return average
@@ -58,7 +93,8 @@ average = 0
 averageCount = 0
 while cap.isOpened():
 
-    #frame1 = imutils.resize(frame1, width=min(800, frame1.shape[1]))
+    frame1 = imutils.resize(frame1, width=min(400, frame1.shape[1]))
+    frame1 = imutils.resize(frame1, width=max(800, frame1.shape[1]))
     result,weights = detector(frame1.copy())
     result1 = len(result)
     
