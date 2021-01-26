@@ -6,16 +6,20 @@ import pyrebase
 import datetime
 
 
-#Trackers
-trDict = {'csrt' : cv2.TrackerCSRT_create,
+
+
+#trackers
+trDict = {
+'csrt' : cv2.TrackerCSRT_create,
 'kcf' : cv2.TrackerKCF_create,
-'boosting' : cv2.TrackerBoosting_create,
-'mil' : cv.TrackerMIL_create,
-'tld' : cv2.TrackerTLD_create,
-'medianflow' : cv2.TrackerMedianFlow_create,
-'mosse' : cv2.TrackerMOSSE_create
+#'boosting' : cv2.TrackerBoosting_create,
+#'mil' : cv.TrackerMIL_create,
+#'tld' : cv2.TrackerTLD_create,
+#'medianflow' : cv2.TrackerMedianFlow_create,
+#'mosse' : cv2.TrackerMOSSE_create
 }
 
+tracker = trDict['csrt']()
 
 roomName = "Room1"
 
@@ -53,8 +57,13 @@ def databaseRead():
 def databaseUpdate(roomName,hour,minute,data):
     print("Update Database " + str(roomName) + "   " + str(hour) +":" + str(minute) +" : " + str(data))
     db.child("Rooms").child(str(roomName)).child(str(hour)).child(str(minute)).set(data)
+    if(minute < 59):
+        db.child("Rooms").child(str(roomName)).child(str(hour)).child(str(minute+1)).set(-1)
+    elif(hour < 23):
+        db.child("Rooms").child(str(roomName)).child(str(hour+1)).child(str(0)).set(-1)
+    else:
+        db.child("Rooms").child(str(roomName)).child(str(0)).child(str(0)).set(-1)
 
-    
 
 #Open CV
 cap = cv2.VideoCapture("walking.avi")
