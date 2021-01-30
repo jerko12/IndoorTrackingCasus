@@ -43,16 +43,14 @@ db.child("Rooms").child("Room1").child("12").child("0").set(3)
 hours = 0
 minutes = 0
 
-#for hour in range(0,24):
- #   for minute in range(0,60):
-  #      db.child("Rooms").child("Room1").child(str(hour)).child(str(minute)).set(-1)
+
 
 def databaseCreate():
     print("CreateNewData")
+    for hour in range(0,24):
+        for minute in range(0,60):
+            db.child("Rooms").child("Room1").child(str(hour)).child(str(minute)).set(-1)
 
-def databaseRead():
-    print("Read Database")
-    #db.child("Rooms").child(str(roomName)).child("13").child("40").get()
 
 def databaseUpdate(roomName,hour,minute,data):
     print("Update Database " + str(roomName) + "   " + str(hour) +":" + str(minute) +" : " + str(data))
@@ -89,11 +87,8 @@ def GetContours():
     return thresh
 
 def detector(image):
-    #image = imutils.resize(image, width=min(400, image.shape[1]))
-    
     clone = image.copy()
     rects, weights = hog.detectMultiScale(image, winStride=(3, 3), padding=(16, 16), scale=0.25)
-    #setRectangles(image, rects)
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
     result = non_max_suppression(rects, probs=None, overlapThresh=1)
     return result,weights
